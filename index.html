@@ -231,16 +231,19 @@ const VRAIES = [
   "Combien de temps il faut que je le dise !",
   "Tu as mis combien de temps pour aller à la Victoire demain ?",
   "Chaîne wifi",
-  "Il faut mettre un déodorisant dans le frigidaire",
-  {text: "Un beau trop dos", real: false, author: "Amélie"},
-  {text: "Y'a pas besoin d'avion pour prendre le permis", real: false, author: "Amélie"},
-  {text: "Tu peux avoir de la fatigue de fièvre", real: false, author: "Amélie"},
-  {text: "Son hôtel de 10 niveau ville", real: false, author: "Amélie"},
-  {text: "C'est la charité qui se fout de l'hôpital", real: false, author: "Amélie"},
-  {text: "Il est resté 5 minutes avec elle et il a même pas demandé un orthographe", real: false, author: "Amélie"},
-  {text: "Le cuiso de la fuiguine", real: false, author: "Amélie"},
-  {text: "Il fait la taille 3 fois ma tête", real: false, author: "Amélie"},
-  {text: "La mousquitaire", real: false, author: "Amélie"}
+  "Il faut mettre un déodorisant dans le frigidaire"
+];
+
+const AMELIE = [
+  "Un beau trop dos",
+  "Y'a pas besoin d'avion pour prendre le permis",
+  "Tu peux avoir de la fatigue de fièvre",
+  "Son hôtel de 10 niveau ville",
+  "C'est la charité qui se fout de l'hôpital",
+  "Il est resté 5 minutes avec elle et il a même pas demandé un orthographe",
+  "Le cuiso de la fuiguine",
+  "Il fait la taille 3 fois ma tête",
+  "La mousquitaire"
 ];
 
 const FAUSSES = [
@@ -306,15 +309,24 @@ function shuffle(arr){
 }
 
 function buildQuestions(n){
+  const allA = shuffle(AMELIE);
   const allV = shuffle(VRAIES);
   const allF = shuffle(FAUSSES);
-  const half = n === 0 ? Math.min(allV.length, allF.length) : Math.floor(n/2);
-  const v = allV.slice(0, half);
-  const f = allF.slice(0, n === 0 ? half : n - half);
-  return shuffle([
-    ...v.map(t=> typeof t === 'string' ? {text:t, real:true} : {text:t.text, real: t.real ?? true, author:t.author}),
-    ...f.map(t=>({text:t, real:false}))
+
+  // Toujours inclure toutes les expressions d'Amélie, compléter avec maman
+  const amelieQ = allA.map(t=>({text:t, real:false, author:'Amélie'}));
+  const total   = n === 0 ? allV.length + amelieQ.length + allF.length : n;
+  const half    = Math.floor(total / 2);
+  const nAmelie = Math.min(amelieQ.length, half);
+  const nMaman  = half - nAmelie;
+  const nFaux   = total - half;
+
+  const chosen = shuffle([
+    ...amelieQ.slice(0, nAmelie),
+    ...allV.slice(0, nMaman).map(t=>({text:t, real:true})),
+    ...allF.slice(0, nFaux).map(t=>({text:t, real:false}))
   ]);
+  return chosen;
 }
 
 // ── Écrans ──
@@ -339,10 +351,10 @@ document.getElementById('btn-start').addEventListener('click', startGame);
 // ── Liste des expressions ──
 document.getElementById('btn-list').addEventListener('click', ()=>{
   const ul = document.getElementById('expr-list');
-  ul.innerHTML = VRAIES.map(t=>{
-    const text   = typeof t === 'string' ? t : t.text;
-    const author = typeof t === 'object' && t.author ? t.author : null;
-    const tag    = author
+  const mamanItems = VRAIES.map(t=>({text: typeof t==='string'?t:t.text, author:null}));
+  const amelieItems = AMELIE.map(t=>({text:t, author:'Amélie'}));
+  ul.innerHTML = [...mamanItems, ...amelieItems].map(({text,author})=>{
+    const tag = author
       ? `<span class="tag tag-amelie">${author}</span>`
       : `<span class="tag tag-maman">Maman</span>`;
     return `<li class="expr-item">${text}${tag}</li>`;
