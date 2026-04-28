@@ -1,11 +1,357 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Expressions</title>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+<title>Maman l'a dit ?</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:#fff9f0;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
+h1{font-size:1.4rem;font-weight:800;color:#c0392b;text-align:center;margin-bottom:4px}
+.subtitle{font-size:.85rem;color:#888;text-align:center;margin-bottom:24px}
+
+/* Accueil */
+#screen-home{display:flex;flex-direction:column;align-items:center;width:100%;max-width:400px}
+.emoji-big{font-size:4rem;margin-bottom:12px}
+.btn-start{background:#c0392b;color:#fff;border:none;border-radius:16px;padding:18px 48px;font-size:1.2rem;font-weight:700;cursor:pointer;margin-top:8px;width:100%}
+.btn-start:active{background:#a93226}
+.players-label{font-size:.9rem;color:#555;margin-top:20px;margin-bottom:8px;align-self:flex-start}
+.players-row{display:flex;gap:8px;width:100%}
+.btn-count{flex:1;border:2px solid #c0392b;border-radius:12px;padding:12px;font-size:1rem;font-weight:600;cursor:pointer;background:#fff;color:#c0392b}
+.btn-count.active{background:#c0392b;color:#fff}
+
+/* Quiz */
+#screen-quiz{display:none;flex-direction:column;align-items:center;width:100%;max-width:400px}
+.hud{display:flex;justify-content:space-between;width:100%;margin-bottom:16px;font-size:.9rem;color:#555;font-weight:600}
+.hud span b{color:#c0392b}
+.card{background:#fff;border-radius:24px;box-shadow:0 4px 24px rgba(0,0,0,.1);padding:32px 24px;width:100%;min-height:200px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:1.15rem;font-weight:600;color:#222;line-height:1.5;margin-bottom:28px;position:relative}
+.card .num{position:absolute;top:12px;right:16px;font-size:.75rem;color:#bbb;font-weight:400}
+.btns{display:flex;flex-direction:column;gap:12px;width:100%}
+.btn-oui{background:#27ae60;color:#fff;border:none;border-radius:16px;padding:20px;font-size:1.1rem;font-weight:700;cursor:pointer}
+.btn-non{background:#e74c3c;color:#fff;border:none;border-radius:16px;padding:20px;font-size:1.1rem;font-weight:700;cursor:pointer}
+.btn-oui:active{background:#1e8449}
+.btn-non:active{background:#c0392b}
+.feedback{position:fixed;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;font-size:5rem;pointer-events:none;opacity:0;transition:opacity .15s}
+.player-badge{background:#f39c12;color:#fff;border-radius:20px;padding:6px 16px;font-size:.85rem;font-weight:700;margin-bottom:12px}
+
+/* Résultats */
+#screen-results{display:none;flex-direction:column;align-items:center;width:100%;max-width:400px}
+.scores-list{width:100%;margin:16px 0}
+.score-row{display:flex;justify-content:space-between;align-items:center;background:#fff;border-radius:14px;padding:14px 20px;margin-bottom:8px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.score-row .name{font-weight:700;color:#333}
+.score-row .pts{font-size:1.3rem;font-weight:800;color:#c0392b}
+.winner{font-size:1.1rem;font-weight:700;color:#f39c12;text-align:center;margin-bottom:8px}
+.btn-restart{background:#c0392b;color:#fff;border:none;border-radius:16px;padding:16px;font-size:1rem;font-weight:700;cursor:pointer;width:100%;margin-top:8px}
+.btn-restart:active{background:#a93226}
+</style>
 </head>
 <body>
-  <h1>Expressions</h1>
+
+<!-- ACCUEIL -->
+<div id="screen-home">
+  <div class="emoji-big">👩‍👧‍👦</div>
+  <h1>Maman l'a dit ?</h1>
+  <p class="subtitle">Vraie expression ou inventée ?</p>
+  <p class="players-label">Nombre de joueurs</p>
+  <div class="players-row" id="players-row">
+    <button class="btn-count active" data-n="2">2</button>
+    <button class="btn-count" data-n="3">3</button>
+    <button class="btn-count" data-n="4">4</button>
+    <button class="btn-count" data-n="5">5</button>
+  </div>
+  <button class="btn-start" id="btn-start">Jouer !</button>
+</div>
+
+<!-- QUIZ -->
+<div id="screen-quiz">
+  <div class="player-badge" id="player-badge">Tour de Joueur 1</div>
+  <div class="hud">
+    <span>Question <b id="q-num">1</b>/20</span>
+    <span>Score <b id="score-cur">0</b></span>
+  </div>
+  <div class="card" id="card">
+    <span class="num" id="q-label"></span>
+    <span id="expr-text"></span>
+  </div>
+  <div class="btns">
+    <button class="btn-oui" id="btn-oui">✅ Maman l'a dit !</button>
+    <button class="btn-non" id="btn-non">❌ Maman l'a pas dit</button>
+  </div>
+</div>
+
+<!-- RÉSULTATS -->
+<div id="screen-results">
+  <div class="emoji-big">🏆</div>
+  <h1>Résultats</h1>
+  <div class="winner" id="winner-text"></div>
+  <div class="scores-list" id="scores-list"></div>
+  <button class="btn-restart" id="btn-restart">Rejouer</button>
+</div>
+
+<div class="feedback" id="feedback"></div>
+
+<script>
+const VRAIES = [
+  "Gâteux de Guitare",
+  "Vinicole",
+  "Le Sourd Phone",
+  "Porter la Ferme",
+  "Il est soporatif le gars là",
+  "Je suis exiguë de ce côté là",
+  "Comme une mange la faim",
+  "Le chanseur! Pas chanseuse!",
+  "Mettre l'abysse en fraction",
+  "Si tu pouvais accélérer, tu es d'une longueur !",
+  "Motif impérial familieux",
+  "Il s'est fait la masse",
+  "Ça vait aller",
+  "Ça te passe par quelle tête !",
+  "La crème à musique",
+  "Il va livre son lire",
+  "Les mocherons ils vont couler",
+  "La cuisa est pite !",
+  "Où est ce qu'elle est où ?",
+  "Tu as pris ta boîte à la dent ?",
+  "Je ne pouvais plus le blairer en peinture le peintre",
+  "Chauffer la fiece",
+  "De lance",
+  "Tu es au kubis ?",
+  "Vous êtes obligés de mettre le sort aussi fond",
+  "Son Bordeaux il l'embarque à vélo",
+  "Une quiche par une carte",
+  "Pourquoi tu me demandes autant de seconde à la minute ?",
+  "Mais, lâchez moi avec les marrons !",
+  "C'est valable du plus petit jusqu'au dernier !",
+  "Je ne peux plus le sentir en peinture !",
+  "Est ce que tu as rangé tes affaires dans la gourde",
+  "Je vais prendre les bouchons de manchette !",
+  "Un paquet de Tampagne",
+  "Il était linge ton sec ?",
+  "Tu as fait du rocker au lait ?",
+  "Ça me satigue !",
+  "A la table !",
+  "La plaque elle est méchée",
+  "Tu ne vas pas bander ton mouillage",
+  "Ferme ton assiette",
+  "Tu as mis de la lèvre sur tes crèmes ?",
+  "Ton pif sur le bout du nez il me perturbe !",
+  "Pourquoi elle a décidé de faire le buffet sous forme de fromage ?",
+  "Mets ta cherché potolaire",
+  "Il m'a mis une compote",
+  "Plutôt que d'aller faire le plancton…",
+  "Qui qui parle à quelqu'un",
+  "Tu peux aller me chercher l'imprimante qui est sur papier ?",
+  "Elle trouvait ça super septique",
+  "Je ne suis pas allé mettre des tombes sur la fleure de maman",
+  "Tirer son épingle du chapeau",
+  "Tom joue à quoi choubakawa",
+  "C'est le photographe qui a mis ton photo en discours",
+  "Prends le drap et laise l'allesse !",
+  "Entre la pomme et le fromage",
+  "C'est pour ça que tes cruisses cuient",
+  "C'est les livraiseurs",
+  "Il lui a donné une chevillère rotulienne",
+  "Pourquoi on a pas de lunettes ?",
+  "Tu veux qu'on lessive les escargots ?",
+  "Tu veux le Billy killer ce soir ?",
+  "Tu es voituré où ?",
+  "Tu prendras le sèche-pain ?",
+  "Qui a piché ma pok ?",
+  "Je pas cuis le coisson encore !",
+  "Combien de temps de reste sur la machine à chemise ?",
+  "Un bon bien chaud…",
+  "On peut avoir de la bouteille dans l'eau ?",
+  "Mi-table",
+  "C'est donc pas la coquette !",
+  "Il ne va pas nous conter Clausette",
+  "Le couvert et le redroit",
+  "Tu peux mettre de l'eau à chuir ?",
+  "Comme un mort la faim",
+  "Il est en Piaf le cage ?",
+  "La boîte à vitesse",
+  "Attends, il faut que je me mette un thermostat",
+  "Si l'eau est pâte, tu mets les cuites ?",
+  "À préféré je choisis celle là",
+  "Tu m'ouvre les fauteuils ?",
+  "Tu en peins le blec",
+  "Tu peux mettre la mette",
+  "Pas sur le tarlet !",
+  "J'ai slicé entre les élèves",
+  "Le we prochain je cuis la table",
+  "C'est un android",
+  "Tu peux mettre une pile sur le linge de Wandrille ?",
+  "Tu peux prendre une paire de couteaux",
+  "Tu as sauté dans les habetements",
+  "Pas un crâne sur le cailloux",
+  "Du trait jusqu'à l'eau…",
+  "Quand est ce qu'on est date ?",
+  "Tu as coûté ça combien ?",
+  "C'est un nœud de ficelle",
+  "Foutez moi tranquille",
+  "Tu peux décoller le doupiaf du pif",
+  "J'ai ma valise à tendre",
+  "Je peux te laisser poulet ?",
+  "Le sec est linge comme en été",
+  "Lille, la ville où on décide des doigts qu'on met dessus",
+  "Je me demande s'il ne faut pas mettre les chaussures à cuire",
+  "Vous voulez Tefex ?",
+  "Sortir le linge du congélateur",
+  "Andeol couches tes volets !",
+  "Andeol, brossage de table tout de suite !!!",
+  "Je dépose à l'école Liole",
+  "Combien de temps il faut que je le dise !",
+  "Tu as mis combien de temps pour aller à la Victoire demain ?",
+  "Chaîne wifi",
+  "Il faut mettre un déodorisant dans le frigidaire"
+];
+
+const FAUSSES = [
+  "Passe moi le fromage de la douche",
+  "Il a mis ses chaussettes au four",
+  "Tu as éteint la télé du jardin ?",
+  "Le chat a encore bu la sonnette",
+  "Remets le canapé dans le lave-vaisselle",
+  "C'est qui qui a rangé le garage dans le frigo ?",
+  "Tu peux baisser le volume du soleil ?",
+  "Il a garé sa fourchette dans le couloir",
+  "J'ai repassé les rideaux avec le grille-pain",
+  "Pourquoi t'as mis tes devoirs dans la poubelle à vélo ?",
+  "Le chien a encore pris une douche dans la voiture",
+  "Tu peux me passer le stylo de la cuisine ?",
+  "J'ai mis les courses dans le lave-linge",
+  "Il avait mis ses clés dans la piscine",
+  "C'est qui qui a planté le téléphone dans le jardin ?",
+  "Tu as vu mon pull dans le congélateur ?",
+  "Remets les lunettes sur la table du garage",
+  "T'as rangé le balai dans le micro-ondes ?",
+  "Il faut mettre les assiettes à charger",
+  "Tu peux allumer la télé du placard ?",
+  "J'ai semé mes chaussures dans l'escalier",
+  "Le vélo a encore sonné deux fois",
+  "Passe moi le sucre qui est dans la salle de bain",
+  "Il a lavé sa veste avec le fer à repasser",
+  "Tu peux fermer la fenêtre du salon d'en bas ?",
+  "J'ai mis le dentifrice dans le frigo pour le garder frais",
+  "Le robinet fait encore ce bruit de voiture",
+  "T'as vu, j'ai peint le canapé en propre !",
+  "Il a mis ses devoirs au congélateur pour les garder",
+  "Tu peux boire ta fourchette doucement ?",
+  "J'ai garé mon manteau sous la table",
+  "C'est qui qui a rangé le soleil derrière le garage ?",
+  "Passe moi la télécommande de la cuisine",
+  "Il faut que j'aille mettre les enfants à l'aspirateur",
+  "T'as vu mes clés dans le lave-vaisselle ?",
+  "Le frigo a encore appelé pendant qu'on mangeait",
+  "Remets les chaussettes dans le tiroir du jardin",
+  "T'as éteint la lumière de la voiture ?",
+  "J'ai oublié mes lunettes dans la poubelle",
+  "Il a mis du beurre sur la télécommande",
+  "Tu peux aller chercher le manteau de la cave à vélo ?",
+  "Il faut qu'on repeigne le plancher du toit",
+  "T'as vu, il a rangé ses affaires dans le robinet !",
+  "J'ai mis la nappe à recharger",
+  "Tu peux éteindre le jardin avant de dormir ?",
+  "Remets le parapluie dans le réfrigérateur",
+  "Il a branché son cartable cette nuit",
+  "T'as mis combien de temps pour rentrer depuis demain ?",
+  "J'ai repassé mes dents ce matin",
+  "Tu peux mettre les couverts à sécher dehors ?"
+];
+
+// ── État ──
+let nPlayers, scores, playerNames, qIndex, questions, currentPlayer, roundScores;
+
+function shuffle(arr){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+
+function buildQuestions(n){
+  const v = shuffle(VRAIES).slice(0, Math.ceil(n/2));
+  const f = shuffle(FAUSSES).slice(0, Math.floor(n/2));
+  return shuffle([
+    ...v.map(t=>({text:t, real:true})),
+    ...f.map(t=>({text:t, real:false}))
+  ]);
+}
+
+// ── UI helpers ──
+const $home   = document.getElementById('screen-home');
+const $quiz   = document.getElementById('screen-quiz');
+const $res    = document.getElementById('screen-results');
+const $fb     = document.getElementById('feedback');
+
+function show(el){[$home,$quiz,$res].forEach(e=>e.style.display='none');el.style.display='flex';}
+
+// ── Accueil ──
+let selectedN = 2;
+document.getElementById('players-row').addEventListener('click', e=>{
+  const btn = e.target.closest('.btn-count');
+  if(!btn) return;
+  selectedN = +btn.dataset.n;
+  document.querySelectorAll('.btn-count').forEach(b=>b.classList.toggle('active', b===btn));
+});
+
+document.getElementById('btn-start').addEventListener('click', startGame);
+
+function startGame(){
+  nPlayers    = selectedN;
+  scores      = Array(nPlayers).fill(0);
+  playerNames = Array.from({length:nPlayers},(_,i)=>`Joueur ${i+1}`);
+  questions   = buildQuestions(20);
+  qIndex      = 0;
+  currentPlayer = 0;
+  roundScores = Array(nPlayers).fill(0);
+  show($quiz);
+  showQuestion();
+}
+
+function showQuestion(){
+  if(qIndex >= questions.length){ endGame(); return; }
+  const q = questions[qIndex];
+  document.getElementById('q-num').textContent    = qIndex+1;
+  document.getElementById('q-label').textContent  = `${qIndex+1}/20`;
+  document.getElementById('expr-text').textContent = q.text;
+  document.getElementById('score-cur').textContent = scores[currentPlayer];
+  document.getElementById('player-badge').textContent = `Tour de ${playerNames[currentPlayer]}`;
+}
+
+function answer(isReal){
+  const q   = questions[qIndex];
+  const ok  = (isReal === q.real);
+  flashFeedback(ok ? '✅' : '❌');
+  if(ok){ scores[currentPlayer]++; roundScores[currentPlayer]++; }
+  qIndex++;
+  currentPlayer = qIndex % nPlayers;
+  setTimeout(showQuestion, 600);
+}
+
+function flashFeedback(emoji){
+  $fb.textContent = emoji;
+  $fb.style.opacity = '1';
+  setTimeout(()=>{ $fb.style.opacity='0'; }, 500);
+}
+
+document.getElementById('btn-oui').addEventListener('click', ()=>answer(true));
+document.getElementById('btn-non').addEventListener('click', ()=>answer(false));
+
+function endGame(){
+  show($res);
+  const max = Math.max(...scores);
+  const winners = playerNames.filter((_,i)=>scores[i]===max);
+  document.getElementById('winner-text').textContent =
+    winners.length === 1 ? `🥇 ${winners[0]} gagne !` : `🤝 Égalité : ${winners.join(' & ')} !`;
+
+  const sorted = playerNames.map((n,i)=>({n,s:scores[i]})).sort((a,b)=>b.s-a.s);
+  document.getElementById('scores-list').innerHTML = sorted.map((p,i)=>`
+    <div class="score-row">
+      <span class="name">${['🥇','🥈','🥉'][i]||'  '} ${p.n}</span>
+      <span class="pts">${p.s} pts</span>
+    </div>`).join('');
+}
+
+document.getElementById('btn-restart').addEventListener('click', ()=>{ show($home); });
+</script>
 </body>
 </html>
