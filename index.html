@@ -197,7 +197,16 @@ const VRAIES = [
   "Combien de temps il faut que je le dise !",
   "Tu as mis combien de temps pour aller à la Victoire demain ?",
   "Chaîne wifi",
-  "Il faut mettre un déodorisant dans le frigidaire"
+  "Il faut mettre un déodorisant dans le frigidaire",
+  "Un beau trop dos",
+  "Y'a pas besoin d'avion pour prendre le permis",
+  "Tu peux avoir de la fatigue de fièvre",
+  "Son hôtel de 10 niveau ville",
+  "C'est la charité qui se fout de l'hôpital",
+  "Il est resté 5 minutes avec elle et il a même pas demandé un orthographe",
+  "Le cuiso de la fuiguine",
+  "Il fait la taille 3 fois ma tête",
+  {text: "La mousquitaire", author: "Amélie"}
 ];
 
 const FAUSSES = [
@@ -266,7 +275,7 @@ function buildQuestions(){
   const v = shuffle(VRAIES).slice(0,10);
   const f = shuffle(FAUSSES).slice(0,10);
   return shuffle([
-    ...v.map(t=>({text:t, real:true})),
+    ...v.map(t=> typeof t === 'string' ? {text:t, real:true} : {text:t.text, real:true, author:t.author}),
     ...f.map(t=>({text:t, real:false}))
   ]);
 }
@@ -305,16 +314,22 @@ function answer(isReal){
   const ok = (isReal === q.real);
   if(ok) score++;
   qIndex++;
-  showFeedback(ok, q.real);
+  showFeedback(ok, q);
 }
 
-function showFeedback(ok, wasReal){
+function showFeedback(ok, q){
   $fb.className = ok ? 'ok' : 'ko';
-  document.getElementById('fb-emoji').textContent  = ok ? '✅' : '❌';
-  document.getElementById('fb-label').textContent  = ok ? 'Bonne réponse !' : 'Raté !';
-  document.getElementById('fb-reveal').textContent = wasReal
-    ? '👩 Maman l\'a vraiment dit !'
-    : '🙅 Maman n\'a jamais dit ça !';
+  document.getElementById('fb-emoji').textContent = ok ? '✅' : '❌';
+  document.getElementById('fb-label').textContent = ok ? 'Bonne réponse !' : 'Raté !';
+  let reveal;
+  if(!q.real){
+    reveal = '🙅 Maman n\'a jamais dit ça !';
+  } else if(q.author){
+    reveal = `👧 C'est ${q.author} qui l'a dit, pas maman !`;
+  } else {
+    reveal = '👩 Maman l\'a vraiment dit !';
+  }
+  document.getElementById('fb-reveal').textContent = reveal;
   show($fb);
   setTimeout(()=>{ show($quiz); showQuestion(); }, 1800);
 }
