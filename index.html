@@ -13,12 +13,8 @@ h1{font-size:1.4rem;font-weight:800;color:#c0392b;text-align:center;margin-botto
 /* Accueil */
 #screen-home{display:flex;flex-direction:column;align-items:center;width:100%;max-width:400px}
 .emoji-big{font-size:4rem;margin-bottom:12px}
-.btn-start{background:#c0392b;color:#fff;border:none;border-radius:16px;padding:18px 48px;font-size:1.2rem;font-weight:700;cursor:pointer;margin-top:8px;width:100%}
+.btn-start{background:#c0392b;color:#fff;border:none;border-radius:16px;padding:18px 48px;font-size:1.2rem;font-weight:700;cursor:pointer;margin-top:24px;width:100%}
 .btn-start:active{background:#a93226}
-.players-label{font-size:.9rem;color:#555;margin-top:20px;margin-bottom:8px;align-self:flex-start}
-.players-row{display:flex;gap:8px;width:100%}
-.btn-count{flex:1;border:2px solid #c0392b;border-radius:12px;padding:12px;font-size:1rem;font-weight:600;cursor:pointer;background:#fff;color:#c0392b}
-.btn-count.active{background:#c0392b;color:#fff}
 
 /* Quiz */
 #screen-quiz{display:none;flex-direction:column;align-items:center;width:100%;max-width:400px}
@@ -31,17 +27,19 @@ h1{font-size:1.4rem;font-weight:800;color:#c0392b;text-align:center;margin-botto
 .btn-non{background:#e74c3c;color:#fff;border:none;border-radius:16px;padding:20px;font-size:1.1rem;font-weight:700;cursor:pointer}
 .btn-oui:active{background:#1e8449}
 .btn-non:active{background:#c0392b}
-.feedback{position:fixed;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;font-size:5rem;pointer-events:none;opacity:0;transition:opacity .15s}
-.player-badge{background:#f39c12;color:#fff;border-radius:20px;padding:6px 16px;font-size:.85rem;font-weight:700;margin-bottom:12px}
+
+/* Feedback plein écran */
+#screen-feedback{display:none;position:fixed;top:0;left:0;right:0;bottom:0;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:100}
+#screen-feedback.ok{background:#27ae60}
+#screen-feedback.ko{background:#e74c3c}
+.fb-emoji{font-size:5rem}
+.fb-label{font-size:1.6rem;font-weight:800;color:#fff}
+.fb-reveal{font-size:1rem;color:rgba(255,255,255,.85);font-weight:600;text-align:center;padding:0 32px;line-height:1.5}
 
 /* Résultats */
 #screen-results{display:none;flex-direction:column;align-items:center;width:100%;max-width:400px}
-.scores-list{width:100%;margin:16px 0}
-.score-row{display:flex;justify-content:space-between;align-items:center;background:#fff;border-radius:14px;padding:14px 20px;margin-bottom:8px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
-.score-row .name{font-weight:700;color:#333}
-.score-row .pts{font-size:1.3rem;font-weight:800;color:#c0392b}
-.winner{font-size:1.1rem;font-weight:700;color:#f39c12;text-align:center;margin-bottom:8px}
-.btn-restart{background:#c0392b;color:#fff;border:none;border-radius:16px;padding:16px;font-size:1rem;font-weight:700;cursor:pointer;width:100%;margin-top:8px}
+.score-final{font-size:3rem;font-weight:800;color:#c0392b;margin:8px 0}
+.btn-restart{background:#c0392b;color:#fff;border:none;border-radius:16px;padding:16px;font-size:1rem;font-weight:700;cursor:pointer;width:100%;margin-top:16px}
 .btn-restart:active{background:#a93226}
 </style>
 </head>
@@ -52,24 +50,16 @@ h1{font-size:1.4rem;font-weight:800;color:#c0392b;text-align:center;margin-botto
   <div class="emoji-big">👩‍👧‍👦</div>
   <h1>Maman l'a dit ?</h1>
   <p class="subtitle">Vraie expression ou inventée ?</p>
-  <p class="players-label">Nombre de joueurs</p>
-  <div class="players-row" id="players-row">
-    <button class="btn-count active" data-n="2">2</button>
-    <button class="btn-count" data-n="3">3</button>
-    <button class="btn-count" data-n="4">4</button>
-    <button class="btn-count" data-n="5">5</button>
-  </div>
-  <button class="btn-start" id="btn-start">Jouer !</button>
+  <button class="btn-start" id="btn-start">Commencer</button>
 </div>
 
 <!-- QUIZ -->
 <div id="screen-quiz">
-  <div class="player-badge" id="player-badge">Tour de Joueur 1</div>
   <div class="hud">
     <span>Question <b id="q-num">1</b>/20</span>
     <span>Score <b id="score-cur">0</b></span>
   </div>
-  <div class="card" id="card">
+  <div class="card">
     <span class="num" id="q-label"></span>
     <span id="expr-text"></span>
   </div>
@@ -79,16 +69,21 @@ h1{font-size:1.4rem;font-weight:800;color:#c0392b;text-align:center;margin-botto
   </div>
 </div>
 
+<!-- FEEDBACK -->
+<div id="screen-feedback">
+  <div class="fb-emoji" id="fb-emoji"></div>
+  <div class="fb-label" id="fb-label"></div>
+  <div class="fb-reveal" id="fb-reveal"></div>
+</div>
+
 <!-- RÉSULTATS -->
 <div id="screen-results">
   <div class="emoji-big">🏆</div>
-  <h1>Résultats</h1>
-  <div class="winner" id="winner-text"></div>
-  <div class="scores-list" id="scores-list"></div>
+  <h1>Score final</h1>
+  <div class="score-final" id="score-final"></div>
+  <p class="subtitle" id="score-sub"></p>
   <button class="btn-restart" id="btn-restart">Rejouer</button>
 </div>
-
-<div class="feedback" id="feedback"></div>
 
 <script>
 const VRAIES = [
@@ -259,7 +254,7 @@ const FAUSSES = [
 ];
 
 // ── État ──
-let nPlayers, scores, playerNames, qIndex, questions, currentPlayer, roundScores;
+let score, qIndex, questions, locked;
 
 function shuffle(arr){
   const a=[...arr];
@@ -267,70 +262,61 @@ function shuffle(arr){
   return a;
 }
 
-function buildQuestions(n){
-  const v = shuffle(VRAIES).slice(0, Math.ceil(n/2));
-  const f = shuffle(FAUSSES).slice(0, Math.floor(n/2));
+function buildQuestions(){
+  const v = shuffle(VRAIES).slice(0,10);
+  const f = shuffle(FAUSSES).slice(0,10);
   return shuffle([
     ...v.map(t=>({text:t, real:true})),
     ...f.map(t=>({text:t, real:false}))
   ]);
 }
 
-// ── UI helpers ──
-const $home   = document.getElementById('screen-home');
-const $quiz   = document.getElementById('screen-quiz');
-const $res    = document.getElementById('screen-results');
-const $fb     = document.getElementById('feedback');
+// ── Écrans ──
+const $home = document.getElementById('screen-home');
+const $quiz = document.getElementById('screen-quiz');
+const $fb   = document.getElementById('screen-feedback');
+const $res  = document.getElementById('screen-results');
 
-function show(el){[$home,$quiz,$res].forEach(e=>e.style.display='none');el.style.display='flex';}
-
-// ── Accueil ──
-let selectedN = 2;
-document.getElementById('players-row').addEventListener('click', e=>{
-  const btn = e.target.closest('.btn-count');
-  if(!btn) return;
-  selectedN = +btn.dataset.n;
-  document.querySelectorAll('.btn-count').forEach(b=>b.classList.toggle('active', b===btn));
-});
+function show(el){[$home,$quiz,$fb,$res].forEach(e=>e.style.display='none');el.style.display='flex';}
 
 document.getElementById('btn-start').addEventListener('click', startGame);
 
 function startGame(){
-  nPlayers    = selectedN;
-  scores      = Array(nPlayers).fill(0);
-  playerNames = Array.from({length:nPlayers},(_,i)=>`Joueur ${i+1}`);
-  questions   = buildQuestions(20);
-  qIndex      = 0;
-  currentPlayer = 0;
-  roundScores = Array(nPlayers).fill(0);
+  score = 0; qIndex = 0; locked = false;
+  questions = buildQuestions();
   show($quiz);
   showQuestion();
 }
 
 function showQuestion(){
   if(qIndex >= questions.length){ endGame(); return; }
+  locked = false;
   const q = questions[qIndex];
-  document.getElementById('q-num').textContent    = qIndex+1;
-  document.getElementById('q-label').textContent  = `${qIndex+1}/20`;
+  document.getElementById('q-num').textContent     = qIndex+1;
+  document.getElementById('q-label').textContent   = `${qIndex+1}/20`;
   document.getElementById('expr-text').textContent = q.text;
-  document.getElementById('score-cur').textContent = scores[currentPlayer];
-  document.getElementById('player-badge').textContent = `Tour de ${playerNames[currentPlayer]}`;
+  document.getElementById('score-cur').textContent = score;
 }
 
 function answer(isReal){
-  const q   = questions[qIndex];
-  const ok  = (isReal === q.real);
-  flashFeedback(ok ? '✅' : '❌');
-  if(ok){ scores[currentPlayer]++; roundScores[currentPlayer]++; }
+  if(locked) return;
+  locked = true;
+  const q  = questions[qIndex];
+  const ok = (isReal === q.real);
+  if(ok) score++;
   qIndex++;
-  currentPlayer = qIndex % nPlayers;
-  setTimeout(showQuestion, 600);
+  showFeedback(ok, q.real);
 }
 
-function flashFeedback(emoji){
-  $fb.textContent = emoji;
-  $fb.style.opacity = '1';
-  setTimeout(()=>{ $fb.style.opacity='0'; }, 500);
+function showFeedback(ok, wasReal){
+  $fb.className = ok ? 'ok' : 'ko';
+  document.getElementById('fb-emoji').textContent  = ok ? '✅' : '❌';
+  document.getElementById('fb-label').textContent  = ok ? 'Bonne réponse !' : 'Raté !';
+  document.getElementById('fb-reveal').textContent = wasReal
+    ? '👩 Maman l\'a vraiment dit !'
+    : '🙅 Maman n\'a jamais dit ça !';
+  show($fb);
+  setTimeout(()=>{ show($quiz); showQuestion(); }, 1800);
 }
 
 document.getElementById('btn-oui').addEventListener('click', ()=>answer(true));
@@ -338,20 +324,16 @@ document.getElementById('btn-non').addEventListener('click', ()=>answer(false));
 
 function endGame(){
   show($res);
-  const max = Math.max(...scores);
-  const winners = playerNames.filter((_,i)=>scores[i]===max);
-  document.getElementById('winner-text').textContent =
-    winners.length === 1 ? `🥇 ${winners[0]} gagne !` : `🤝 Égalité : ${winners.join(' & ')} !`;
-
-  const sorted = playerNames.map((n,i)=>({n,s:scores[i]})).sort((a,b)=>b.s-a.s);
-  document.getElementById('scores-list').innerHTML = sorted.map((p,i)=>`
-    <div class="score-row">
-      <span class="name">${['🥇','🥈','🥉'][i]||'  '} ${p.n}</span>
-      <span class="pts">${p.s} pts</span>
-    </div>`).join('');
+  document.getElementById('score-final').textContent = `${score} / 20`;
+  const pct = score/20;
+  const msg = pct >= .9 ? 'Tu connais maman par cœur ! 🌟'
+            : pct >= .7 ? 'Très bon score ! 👏'
+            : pct >= .5 ? 'Pas mal du tout !'
+            : 'Maman te surprend encore… 😄';
+  document.getElementById('score-sub').textContent = msg;
 }
 
-document.getElementById('btn-restart').addEventListener('click', ()=>{ show($home); });
+document.getElementById('btn-restart').addEventListener('click', ()=>show($home));
 </script>
 </body>
 </html>
