@@ -198,15 +198,15 @@ const VRAIES = [
   "Tu as mis combien de temps pour aller à la Victoire demain ?",
   "Chaîne wifi",
   "Il faut mettre un déodorisant dans le frigidaire",
-  "Un beau trop dos",
-  "Y'a pas besoin d'avion pour prendre le permis",
-  "Tu peux avoir de la fatigue de fièvre",
-  "Son hôtel de 10 niveau ville",
-  "C'est la charité qui se fout de l'hôpital",
-  "Il est resté 5 minutes avec elle et il a même pas demandé un orthographe",
-  "Le cuiso de la fuiguine",
-  "Il fait la taille 3 fois ma tête",
-  {text: "La mousquitaire", author: "Amélie"}
+  {text: "Un beau trop dos", real: false, author: "Amélie"},
+  {text: "Y'a pas besoin d'avion pour prendre le permis", real: false, author: "Amélie"},
+  {text: "Tu peux avoir de la fatigue de fièvre", real: false, author: "Amélie"},
+  {text: "Son hôtel de 10 niveau ville", real: false, author: "Amélie"},
+  {text: "C'est la charité qui se fout de l'hôpital", real: false, author: "Amélie"},
+  {text: "Il est resté 5 minutes avec elle et il a même pas demandé un orthographe", real: false, author: "Amélie"},
+  {text: "Le cuiso de la fuiguine", real: false, author: "Amélie"},
+  {text: "Il fait la taille 3 fois ma tête", real: false, author: "Amélie"},
+  {text: "La mousquitaire", real: false, author: "Amélie"}
 ];
 
 const FAUSSES = [
@@ -275,7 +275,7 @@ function buildQuestions(){
   const v = shuffle(VRAIES).slice(0,10);
   const f = shuffle(FAUSSES).slice(0,10);
   return shuffle([
-    ...v.map(t=> typeof t === 'string' ? {text:t, real:true} : {text:t.text, real:true, author:t.author}),
+    ...v.map(t=> typeof t === 'string' ? {text:t, real:true} : {text:t.text, real: t.real ?? true, author:t.author}),
     ...f.map(t=>({text:t, real:false}))
   ]);
 }
@@ -321,15 +321,12 @@ function showFeedback(ok, q){
   $fb.className = ok ? 'ok' : 'ko';
   document.getElementById('fb-emoji').textContent = ok ? '✅' : '❌';
   document.getElementById('fb-label').textContent = ok ? 'Bonne réponse !' : 'Raté !';
-  let reveal;
-  if(!q.real){
-    reveal = '🙅 Maman n\'a jamais dit ça !';
-  } else if(q.author){
-    reveal = `👧 C'est ${q.author} qui l'a dit, pas maman !`;
-  } else {
-    reveal = '👩 Maman l\'a vraiment dit !';
-  }
-  document.getElementById('fb-reveal').textContent = reveal;
+  const isRealExpr = q.real || !!q.author;
+  const vraiLabel  = isRealExpr ? '✔ Vrai !' : '✘ Faux !';
+  const who        = q.real    ? '👩 Maman l\'a dit !'
+                   : q.author  ? `👧 C'est ${q.author} qui l'a dit !`
+                   :             '🙅 Personne n\'a dit ça !';
+  document.getElementById('fb-reveal').innerHTML = `<strong>${vraiLabel}</strong><br>${who}`;
   show($fb);
   setTimeout(()=>{ show($quiz); showQuestion(); }, 1800);
 }
