@@ -313,11 +313,10 @@ function buildQuestions(n){
   const allV = shuffle(VRAIES);
   const allF = shuffle(FAUSSES);
 
-  // Toujours inclure toutes les expressions d'Amélie, compléter avec maman
   const amelieQ = allA.map(t=>({text:t, real:false, author:'Amélie'}));
-  const total   = n === 0 ? allV.length + amelieQ.length + allF.length : n;
+  const total   = n === 0 ? allV.length + allF.length + 2 : n;
   const half    = Math.floor(total / 2);
-  const nAmelie = Math.min(amelieQ.length, half);
+  const nAmelie = Math.min(amelieQ.length, 2);
   const nMaman  = half - nAmelie;
   const nFaux   = total - half;
 
